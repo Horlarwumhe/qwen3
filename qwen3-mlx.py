@@ -11,7 +11,9 @@ import functools
 
 TIMES = {}
 QUANTIZED=True
-BITS=None
+BITS=4
+FAST_MODE = True
+
 def measure(fn):
     @functools.wraps(fn)
     def inner(*a, **b):
@@ -412,14 +414,15 @@ def load_weights_into_qwen(model, param_config, params):
         bits = param_config.get('bits',None)
         if right.ndim == 1:
             return right
-        scale = params[tensor_name+".scale"]
-        bias = params[tensor_name+".bias"]
+        tensor_name = tensor_name.replace('.weight','')
+        scale = params[tensor_name+".scales"]
+        bias = params[tensor_name+".biases"]
         if not quantize:
             # dont quantize
             return mx.dequantize(right,scale,bias,bits=bits)
         return (right,scale,bias)
 
-    if "model.embed_tokens.weight.scale" in params:
+    if "model.embed_tokens.scales" in params:
         fn = assing_quantize
         print("weight qunatized 4bit.")
     else:
