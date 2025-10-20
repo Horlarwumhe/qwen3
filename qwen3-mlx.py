@@ -4,15 +4,12 @@ import mlx.core as mx
 from qtoken import Qwen3Tokenizer
 import random
 import time
-USE_REASONING_MODEL = False  # Set to True if using reasoning model, False for base model
-
-import time
-import functools
 
 TIMES = {}
 QUANTIZED=True
 BITS=4
 FAST_MODE = True
+
 
 def measure(fn):
     @functools.wraps(fn)
@@ -106,7 +103,6 @@ class Embedding(Module):
         self.dtype = dtype
         self.weight = mx.random.normal((num_embeddings, dim),None,0,1) #astype(dtype)
 
-    @measure
     def forward(self, x):
        return self.weight[x].astype(self.dtype)
     
@@ -118,7 +114,6 @@ class FeedForward(Module):
         self.up_proj = Linear(cfg["emb_dim"], cfg["hidden_dim"], dtype=cfg["dtype"], bias=False)
         self.down_proj = Linear(cfg["hidden_dim"], cfg["emb_dim"], dtype=cfg["dtype"], bias=False)
     
-    @measure
     def forward(self, x):
         x_gate = self.gate_proj(x)
         x_up = self.up_proj(x)
